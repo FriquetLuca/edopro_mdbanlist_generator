@@ -71,6 +71,19 @@ function findDBItem(searchTerm = 'Blue-Eyes White Dragon') {
     }
 }
 
+function parseAndFormatDate(dateStr) {
+    if (!dateStr) return 'MasterDuel';
+    // Remove ordinal suffixes like th, st, nd, rd (e.g. 5th -> 5)[cite: 1]
+    const cleaned = dateStr.replace(/(\d+)(st|nd|rd|th)/i, '$1');
+    const d = new Date(cleaned);
+    if (isNaN(d.getTime())) return 'MasterDuel';
+    
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+}
+
 async function crawlBanlist() {
     if(!process.env.MASTER_DUEL_LIST_LINK) {
         console.error("no `MASTER_DUEL_LIST_LINK` found");
@@ -89,6 +102,11 @@ async function crawlBanlist() {
     try {
         await page.goto(process.env.MASTER_DUEL_LIST_LINK, { waitUntil: 'networkidle2', timeout: 60 * 60000 });
         const banlistData = await page.evaluate(() => {
+            const dateEl = document.querySelector('div.selectedItem div.selection') || document.querySelector('#aria-selection');
+            let rawDateText = dateEl ? dateEl.textContent.trim() : '';
+            if (rawDateText.startsWith('Option ')) {
+                rawDateText = rawDateText.replace('Option ', '').replace(', selected.', '').trim();
+            }
             const mainElement = document.querySelector('body > div > main > div');
             if (!mainElement) return null;
             const children = Array.from(mainElement.children);
@@ -109,6 +127,7 @@ async function crawlBanlist() {
                 }
             }
             return {
+                rawDateText,
                 forbidden: sections[0] || [],
                 limited: sections[1] || [],
                 semiLimited: sections[2] || []
@@ -164,7 +183,11 @@ async function createMasterDuelLflists() {
         console.error("no banlist found");
         process.exit(1);
     }
-    const mdDocument = ['#[MasterDuel]', '!MasterDuel'];
+    const formattedDate = parseAndFormatDate(banlist.rawDateText);
+    const mdDocument = [
+        `#[${formattedDate} MasterDuel]`, 
+        `!${formattedDate} MasterDuel`
+    ];
     pushToDocument(mdDocument, '#Forbidden', banlist.forbidden, 0);
     pushToDocument(mdDocument, '#Limited', banlist.limited, 1);
     pushToDocument(mdDocument, '#Semi-limited', banlist.semiLimited, 2);
