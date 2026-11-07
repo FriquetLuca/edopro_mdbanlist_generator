@@ -164,6 +164,7 @@ function pushToDocument(mdDocument, listLabel, currentList, limit) {
                     console.log(`card not found: ${cardName}`);
                 } else {
                     const idSet = new Set();
+                    correctCards.sort((a, b) => Number(a.id) - Number(b.id));
                     correctCards.forEach(card => {
                         if(idSet.has(card.id)) return;
                         mdDocument.push(`${card.id} ${limit} --${card.refinedName}`);
