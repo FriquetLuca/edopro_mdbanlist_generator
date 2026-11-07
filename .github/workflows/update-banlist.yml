@@ -1,0 +1,51 @@
+name: Daily Master Duel Banlist Update
+
+on:
+  schedule:
+    - cron: '0 6 * * *'
+  workflow_dispatch:
+
+jobs:
+  update-banlist:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Clone CDB repositories
+        run: |
+          mkdir -p cdbs
+          git clone --depth 1 https://github.com/ProjectIgnis/BabelCDB.git cdbs/BabelCDB
+          git clone --depth 1 https://github.com/ProjectIgnis/DeltaBagooska.git cdbs/DeltaBagooska
+
+      - name: Run banlist generator script
+        env:
+          MASTER_DUEL_LIST_LINK: ${{ secrets.MASTER_DUEL_LIST_LINK }}
+        run: node index.js
+
+      - name: Check for changes and commit
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          
+          if [[ -n $(git status --porcelain lflists/MasterDuel.lflist.conf) ]]; then
+            git add lflists/MasterDuel.lflist.conf
+            git commit -m "chore: automated update of Master Duel banlist [skip ci]"
+            git push
+            echo "Changes pushed successfully!"
+          else
+            echo "No changes detected in the banlist."
+          fi

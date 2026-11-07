@@ -9,39 +9,33 @@ dotenv.config({
   quiet: true,
 });
 
-if(!process.env.EDOPRO_PATH) {
-    console.error("no `EDOPRO_PATH` found");
-    process.exit(1);
+const CDBS_DIR = path.resolve(process.cwd(), 'cdbs');
+
+function getAllCdbFiles(dirPath) {
+    if (!fs.existsSync(dirPath)) return [];
+    
+    let results = [];
+    const entries = fs.readdirSync(dirPath, { withFileTypes: true });
+
+    for (const entry of entries) {
+        const fullPath = path.join(dirPath, entry.name);
+        if (entry.isDirectory()) {
+            results = results.concat(getAllCdbFiles(fullPath));
+        } else if (entry.isFile() && entry.name.endsWith('.cdb')) {
+            results.push({
+                filename: entry.name,
+                fullPath: fullPath
+            });
+        }
+    }
+    return results;
 }
 
-const EDOPRO_PATH = path.resolve(process.env.EDOPRO_PATH);
-
-
-const EXPANSIONS_PATH = path.join(EDOPRO_PATH, 'expansions');
-const DELTA_BAGOOSKA_PATH = path.join(EDOPRO_PATH, 'repositories/delta-bagooska');
-
-const bagFiles = fs.readdirSync(DELTA_BAGOOSKA_PATH)
-    .filter(file => file.endsWith('.cdb'))
-    .map(file => ({
-        filename: file,
-        nameWithoutExt: path.parse(file).name,
-        sqlAlias: `db_${path.parse(file).name.replace(/[^a-zA-Z0-9_]/g, '_')}`,
-        fullPath: path.join(DELTA_BAGOOSKA_PATH, file)
-    }));
-const expFiles = fs.readdirSync(EXPANSIONS_PATH)
-    .filter(file => file.endsWith('.cdb'))
-    .map(file => ({
-        filename: file,
-        nameWithoutExt: path.parse(file).name,
-        sqlAlias: `db_${path.parse(file).name.replace(/[^a-zA-Z0-9_]/g, '_')}`,
-        fullPath: path.join(EXPANSIONS_PATH, file)
-    }));
-
-const cdbFiles = [...bagFiles, ...expFiles];
+const cdbFiles = getAllCdbFiles(CDBS_DIR);
 
 if (cdbFiles.length === 0) {
-    console.log("no .cdb found in the specified EDOPRO_PATH");
-    process.exit(0);
+    console.error("No .cdb files found in ./cdbs directory!");
+    process.exit(1);
 }
 
 function findDBItem(searchTerm = 'Blue-Eyes White Dragon') {

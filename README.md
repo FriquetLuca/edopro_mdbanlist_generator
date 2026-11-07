@@ -2,6 +2,15 @@
 
 ## Manual Work
 
+Install the project:
+
+```sh
+npm install
+mkdir -p cdbs
+git clone https://github.com/ProjectIgnis/BabelCDB cdbs/BabelCDB
+git clone https://github.com/ProjectIgnis/DeltaBagooska cdbs/DeltaBagooska
+```
+
 Generate your own Master Duel forbidden / limited list using `NodeJS`.
 Put the correct path to your `EDOPro` directory in a `.env` file then run:
 
