@@ -7,4 +7,4 @@ Put the correct path to your `EDOPro` directory in a `.env` file then run:
 npm run generate
 ```
 
-Finally drag your newly generated `MasterDuel.lflist.conf` into the `EDOPro/lflists` directory.
+Finally drag your newly generated `MasterDuel.lflist.conf` (located in `/lflists`) into the `EDOPro/lflists` directory.

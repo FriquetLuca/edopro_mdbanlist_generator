@@ -168,7 +168,7 @@ async function createMasterDuelLflists() {
     pushToDocument(mdDocument, '#Forbidden', banlist.forbidden, 0);
     pushToDocument(mdDocument, '#Limited', banlist.limited, 1);
     pushToDocument(mdDocument, '#Semi-limited', banlist.semiLimited, 2);
-    const outputPath = path.resolve(process.cwd(), 'MasterDuel.lflist.conf');
+    const outputPath = path.resolve(process.cwd(), 'lflists/MasterDuel.lflist.conf');
     fs.writeFileSync(outputPath, mdDocument.join('\n'), 'utf-8');
     console.log('Master Duel forbidden / limited list successfully generated');
 }
