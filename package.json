@@ -1,0 +1,20 @@
+{
+  "name": "master_duel_banlist",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "generate": "node index.js"
+  },
+  "keywords": [],
+  "type": "commonjs",
+  "dependencies": {
+    "better-sqlite3": "^13.0.3",
+    "dotenv": "^18.0.9",
+    "puppeteer": "^25.16.0"
+  },
+  "allowScripts": {
+    "better-sqlite3@13.0.3": true,
+    "puppeteer@25.16.0": true
+  }
+}
