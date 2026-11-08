@@ -8,7 +8,8 @@ on:
 jobs:
   update-banlist:
     runs-on: ubuntu-latest
-
+    environment: MASTER_DUEL_BANLIST
+    
     permissions:
       contents: write
 
